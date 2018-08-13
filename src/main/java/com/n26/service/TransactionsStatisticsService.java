@@ -8,11 +8,11 @@ public interface TransactionsStatisticsService {
 
     TransactionsStatisticsEntity convertDtoToEntity(TransactionsStatisticsDto transStatDto, String eventId);
 
-    void createNewTransaction(TransactionsStatisticsEntity transactionsStatisticsEntity, String eventId);
+    boolean createNewTransaction(TransactionsStatisticsEntity transactionsStatisticsEntity, String eventId);
 
     Statistics getTransactionsAndStatistics();
 
-    void deleteAllTransactions();
+    void deleteAllTransactions(String eventId);
 
     void transactionsStatisticsScheduler();
 }

@@ -17,8 +17,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
 @Slf4j
 @RestController
 @RequestMapping({"/api/transStat"})
@@ -73,10 +71,11 @@ public class TransactionsStatisticsController {
 
         log.info("Received request to delete all transactions. EventId: {}", eventId);
 
-        transactionsStatisticsService.deleteAllTransactions();
+        transactionsStatisticsService.deleteAllTransactions(eventId);
 
         log.info("Finished to delete all transactions. EventId: {}", eventId);
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
 }

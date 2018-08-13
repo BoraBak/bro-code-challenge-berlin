@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.format.DateTimeParseException;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -45,24 +46,30 @@ public class TransactionsStatisticsServiceImpl implements TransactionsStatistics
         try {
             amount = new BigDecimal(transStatDto.getAmount());
             transactionTime = Instant.parse(transStatDto.getTimestamp());
-        } catch (ApiNoContentRequestException e) {
-            log.error(e.getMessage() + ". EventId: {}", eventId);
-            throw new ApiUnprocessableEntityRequestException(e.getMessage(), eventId);
+        } catch (NumberFormatException e) {
+            log.error(e + ": can't parse 'amount' to BigDecimal. EventId: {}", eventId);
+            throw new ApiUnprocessableEntityRequestException("NumberFormatException: can't parse 'amount' to BigDecimal.", eventId);
+        } catch (DateTimeParseException e) {
+            log.error(e + ": can't parse 'timestamp' to a valid Time format. EventId: {}", eventId);
+            throw new ApiUnprocessableEntityRequestException("DateTimeParseException: can't parse 'timestamp' to a valid Time format.", eventId);
         }
         return new TransactionsStatisticsEntity(amount, transactionTime);
     }
 
     @Override
-    public void createNewTransaction(TransactionsStatisticsEntity transactionsStatisticsEntity, String eventId) {
+    public boolean createNewTransaction(TransactionsStatisticsEntity transactionsStatisticsEntity, String eventId) {
 
         validateNotNullInputArgs(transactionsStatisticsEntity, eventId);
 
         validateCorrectnessInputArgs(transactionsStatisticsEntity, eventId);
 
-        transactionsStatisticsDao.createNewTransaction(transactionsStatisticsEntity);
+        boolean newTransactionProcessResult = transactionsStatisticsDao.createNewTransaction(transactionsStatisticsEntity);
 
-        //TODO: advice with Igor regards
-        transactionsStatisticsScheduler();
+        if (newTransactionProcessResult) {
+            //TODO: advice with Igor regards
+            transactionsStatisticsScheduler();
+        }
+        return newTransactionProcessResult;
     }
 
     @Override
@@ -71,8 +78,8 @@ public class TransactionsStatisticsServiceImpl implements TransactionsStatistics
     }
 
     @Override
-    public void deleteAllTransactions() {
-        transactionsStatisticsDao.deleteAllTransactions();
+    public void deleteAllTransactions(String eventId) {
+        transactionsStatisticsDao.deleteAllTransactions(eventId);
 
         nullifyTransactionsStatistics();
     }

@@ -6,9 +6,9 @@ import java.util.List;
 
 public interface TransactionsStatisticsDao {
 
-    void createNewTransaction(TransactionsStatisticsEntity transactionsStatisticsEntity);
+    boolean createNewTransaction(TransactionsStatisticsEntity transactionsStatisticsEntity);
 
-    void deleteAllTransactions();
+    void deleteAllTransactions(String eventId);
 
     List<TransactionsStatisticsEntity> getTransactionsStatistics();
 }
